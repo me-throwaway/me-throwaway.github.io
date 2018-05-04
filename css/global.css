@@ -1,10 +1,11 @@
-@media screen and (min-aspect-ratio: 1/1) {
+@media screen and (max-aspect-ratio: 1/1) {
 	body {
-		max-width: 50%;
+		max-width: 95%;
 	}
 }
 
 body {
+	max-width: 50%;
 	margin: 0 auto;
 	font-family: sans-serif;
 	line-height: 1.6;
