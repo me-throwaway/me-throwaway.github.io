@@ -2,6 +2,10 @@
 	body {
 		max-width: 85% !important;
 	}
+
+	#email {
+		width: 50% !important;
+	}
 }
 
 body {
@@ -10,3 +14,8 @@ body {
 	font-family: sans-serif;
 	line-height: 1.6;
 }
+
+#email {
+	width: 30%;
+}
+
