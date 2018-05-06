@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Blockchain</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<header>
+<h1 class="title">Blockchain</h1>
+</header>
+<hr />
+<div class="nav">
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/blog">↑ Up</a></td>
+<td style="text-align: center;"><a href="/">Home</a></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><em>Originally <a href="https://tjournal.ru/45977">posted</a> in russian at tjournal.ru. This is a self-translation</em></td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="/img/1513861612.png" />
+</figure>
+<p>People tied to the blockchain industry generally tend to think their occupation exists somewhere near the border of technological singularity, and therefore is not suitable to be explained to a regular people as is. That's why their &quot;explanations&quot; mostly consist of either bunch of confusing buzzwords such as &quot;Uber of finance&quot;, &quot;Immutable distributed ledger&quot;, &quot;The Internet of Value&quot; (seriously, how do I even suppose to interpret this?), or unnecessary simplifications to the point where anything they say just cease to reflect reality.</p>
+<p>I don't like such sort of approach. I believe, true confidence is only attainable by understanding details of technical implementation, and the most reliable way to learn how something works is to build it yourself. So today we are going to create fully functioning blockchain from scratch. Yep, right on your computer, without any prior knowlege. Because process is so simple it doesn't require one.</p>
+<p>But before we start, we need to make sure the reader knows what &quot;hash-sum&quot; is. It's essential part of any sort of blockchain so knowing what it is at least conceptually is absolute requirement.</p>
+<h3 id="hash">Hash</h3>
+<p>Depending on context, the word &quot;hash&quot; can refer to either hash-function itslef, or just output of such function. By definition, hash function is an algorithm, that recieves any sort of data (pictures, text, video, plain bunch of computer-readable ones and zeroes etc.) as input and generates another bunch of data with fixed size preferably.</p>
+<p>It is important for good hash function to <strong>always</strong> generate different output for different input, and also always generate the same output if input was the same (the case when different inputs produce the same output is usually considered critical vulnerablity called <a href="https://en.wikipedia.org/wiki/Collision_attack">cryptographic collision</a>). Also there must be involved some premanent loss of data, so with just output, we couldn't simply re-calculate initial input.</p>
+<figure>
+<img src="/img/1513862999.jpg" />
+</figure>
+<p>There is <a href="https://en.wikipedia.org/wiki/Comparison_of_cryptographic_hash_functions">plenty</a> of different hash functions, and since every function is just documented sequence of abstract calculations, for any function is possible to be countless amount of real-world implementations.</p>
+<p>And to make it perfectly clear, I'll demonstrate what it looks like in practice. Go <a href="http://www.letmegooglethat.com/?q=sha256+online">find</a> any sha256 (function used in bitcoin and also most famous one) online calculator and play with inserting different values. For example, hash sum of &quot;Google&quot; equals to <code>ce770667e5f9b0d8f55367bb79419689d90c48451bb33f079f3a9a72ae132de8</code> and for &quot;google&quot; we get <code>bbdefa2950f49882f295b1285d4fa9dec45fc4144bfb07ee6acc68762d12c2e3</code>. And it always be so, otherwise this specific implementation of sha256 is no doubt broken.</p>
+<p>Read more about internals of sha256 specifically <a href="/pages/blog/2">here</a>.</p>
+<h3 id="diy">DIY</h3>
+<p>That's it. It is everything you need to know to build primitive Proof-of-Concept blockchain. To the difinition: blockchain is a chain of cryprographically conjuncted blocks (&quot;block&quot; is an abstract conception, it could be anything, but usually it means just &quot;file&quot;). Let's create a first block.</p>
+<p>Block can contain any sort of data, but since most widely known application of blockchain idea is cryptocurrencies, why not just follow this trend and put up with some fake transactions. Open your favorite notepad.exe and create the first file:</p>
+<pre><code>Jack -&gt; John :: 2$
+Neal -&gt; Nina :: 5$
+Theo -&gt; Zack :: 3$</code></pre>
+<figure>
+<img src="/img/1513944501.png" />
+</figure>
+<p>First block doesn't require any conjunction, so that's it. Save this file as &quot;1.txt&quot; in some directory (FYI: We've just created something known as <a href="https://en.bitcoin.it/wiki/Genesis_block">Genesis block</a> and even in most serious projects genesis block was likely manually created). Ready? Go to any of previously googled websites (as you can probably guess, nobody calculates hash sums this way in a real projects, but it suitable for our simplest demonstration) and calculate hash sum for this freshly created file.</p>
+<p>I've got <code>1cf76c1a2535fab725f59b88a9a0df6b8482c8d2b376d6701c2acafcee8c1388</code>, you can get whatever depending on encoding, actual data, amount of whitespaces/tabs etc. No matter what you get, just save this string, we'll need it.</p>
+<p>Now create the new file, named &quot;2.txt&quot;. Write up some more &quot;transactions&quot;:</p>
+<pre><code>Adam -&gt; Alex :: 10$
+Rosa -&gt; Niko :: 3$
+Kyle -&gt; Joey :: 7$</code></pre>
+<p>And to the last string goes entire hash of a previous file. Like this:</p>
+<pre><code>Adam -&gt; Alex :: 10$
+Rosa -&gt; Niko :: 3$
+Kyle -&gt; Joey :: 7$
+1cf76c1a2535fab725f59b88a9a0df6b8482c8d2b376d6701c2acafcee8c1388</code></pre>
+<p>Ready? Save the new file and go calculate hash of the whole 2.txt with hash of the previous block included. I've got <code>aad5e065fe19cf14070e54fd53355df0d94a2453c610300ca98f16b30411b42e</code>. All right.</p>
+<figure>
+<img src="/img/1513950918.png" />
+</figure>
+<p>Similarly, create the third file and the following, as many as you need. No limitations on the number of blocks, for example bitcoin's blockchain at the time of writing (27.06.17) consists of 473,011 blocks, where information about almost 250,000,000 transactions was written. This is huge, but not as huge as it can get in the nearest future, stay tuned.</p>
+<h3 id="remarqué">Remarqué</h3>
+<p>Bitcoin's blockchain has a long history, and it isn't as perfectly solid as we usually used to imagine. For example, in the middle of chain <a href="https://github.com/bitcoin/bips/blob/master/bip-0050.mediawiki">exists</a> some manually written blocks verification of which was hardcoded to be always skipped. Also there is plenty of <a href="https://blockchain.info/block/000000000000000000bfe32018f94b3b7ff68049f1108becc55a5bde364bd45c">empty</a> blocks and some other cool/weird stuff.</p>
+<h3 id="back-to-reality">Back to reality</h3>
+<p>You can create all the files by hand, or download my previously prepared <a href="/files/example_chain.zip">archive</a> with 10 &quot;blocks&quot; and &quot;final&quot; block that stores nothing but hash of the latest actual block.</p>
+<figure>
+<img src="/img/1513952155.png" />
+</figure>
+<p>Is it blockchain already? Technically, yes. But we need some other stuff to make it useful in any way. Stuff like function to check chain integrity, ability to automatically verify, is it blockchain, or just some bunch of random independent files. You can verify it by hand, just by calculating hash of an each file and compare results with strings writtent in the files itslef, but doing this using computer program is drastically faster and more reliable.</p>
+<p>I <a href="/files/scripts/check_integrity.sh">wrote</a> a primitive, but well commented shell script to automatically check integrity of our improvised blockchain. It is prepared for most widespread command interpreter in the world – <a href="https://tiswww.case.edu/php/chet/bash/bashtop.html">bash</a>, so users of any real operating system should be able to run it without any preparations. Use<del>d</del>rs of Windows are suggested to install <a href="https://www.cygwin.com">cygwin</a> for example.</p>
+<figure>
+<img src="/img/1513953288.png" />
+</figure>
+<p>So navigate to directory where our blockchain resides, and after execution of the script we chould get something like this.</p>
+<pre><code>10 blocks
+chain is flawless
+final hash = 23cbc83ca6a2cf2e75ae5ca76fb087ef11ff36fb0065c301557c8152a5bc530f</code></pre>
+<figure>
+<img src="/img/1513953439.png" />
+</figure>
+<p>Which means everything is all right, data was presented in initial state, no modifications was made. Now try to change something: remove witespace, alter some letters, add or remove data, whatever. The result of script execution will tell us something is wrong immediately.</p>
+<pre><code>chain is corrupted</code></pre>
+<p>Revert any changes you made and chain verification will be issued flawlessly again.</p>
+<h3 id="mining">Mining</h3>
+<p>Now, we could have just stopped, because our project already meets the definition of blockchain. But you have probably heard something about mining, so why not just fill the gap entirely. We now take our chain and add some more information. At the first line of each file we place some random string, say, the number exactly 10 digits long. In the cryptocurrencies this field called <a href="https://en.bitcoin.it/wiki/Block_hashing_algorithm">nonce</a>. This way:</p>
+<pre><code>0000000000
+Jack -&gt; John :: 2$
+Neal -&gt; Nina :: 5$
+Theo -&gt; Zack :: 3$</code></pre>
+<p>Now calculate our hash string again. It changed, obviously, now I got <code>457e6444fe5d4a42890412eae4060975586bf41c4fad49ab1787d81b2f8b0da7</code>. But we doesn't like it. Why? Well, official documentation (for example) made it clear: system only accepts hashes that start from zero.</p>
+<p>And if we write something like that to blockchain we, first of all, will just get an verification error, and even if we forcefully do something to preserve blockchain with different characteristics somewhere, it would be obvious for everyone who look at it, that such copy of the chain is totally flawed.</p>
+<p>Okay, looks like we have no choice, we need to figure out how to get hash starting from zero. It is not possible to just write desired hash string and do something with it to generate correspondenting initial content (in fact, we <a href="https://en.wikipedia.org/wiki/P_versus_NP_problem">don't know</a> for sure it's not possible, but at least nobody managed to create such algorithm yet). So the only way to achieve so is to <a href="https://en.wikipedia.org/wiki/Brute-force_attack">brute-force</a> shit. Add 1 to our nonce. It becomes 0000000001. Calculate hash. Fail. Repeat.</p>
+<p>Heck. It may take hours or even days.</p>
+<figure>
+<img src="/img/1513969398.jpg" />
+</figure>
+<p>Good thing that computers exist and we can quckly write up another <a href="/files/scripts/brute_force.sh">script</a> to authomatize procedure. Here we got 2 essential variables: LENGTH means number of digits that should match criteria and GOAL equals to what this digits should be equal to. Average amount of computational resources needed to finish such brute-force grows with amount of digits selected exponentionally.</p>
+<p>Run the script without changing anything, and you'll see result in seconds. Change LENGTH to 3 and GOAL to 000, and it'll take up to a minute. Change LENGTH to 10 and GOAL to 000000000 and you'll likely end up bored before execution ends.</p>
+<figure>
+<img src="/img/1513970489.png" />
+</figure>
+<p>I have had &quot;mined&quot; the <a href="/files/example_chain_mined.zip">chain</a> with &quot;complexity&quot; equal to the rule &quot;three zeroes at the start of every hash&quot;. Try to cheat and change some data inside of it without re-mining, so every hash will remain to be starting from three zeroes <strong>and</strong> chain verifying using previously decribed script will end flawless. Looks impossible, right? Because it is.</p>
+<p>We just built example of classical &quot;Proof of Work&quot; mining, it guarantees data stored in the chain can not be simply altered without re-mining everything from scratch. Still, mining is not something absolutely required for blockchain to work, blockchain is a just static data. What you can build upon blockchain is limited only by your own fantasy.</p>
+<h3 id="so-if-i-re-mine-every-single-block-of-bitcoin-blockchain-and-produce-chain-longer-than-one-that-already-exists-i-can-take-away-all-21-million-of-bitcoins">So if I re-mine every single block of Bitcoin blockchain and produce chain longer than one that already exists, I can take away all 21 million of bitcoins?</h3>
+<p>Yes.</p>
+<h3 id="how-is-bitcoin-related-to-blockchain">How is Bitcoin related to blockchain?</h3>
+<p>Blockchain is electricity, cryptocurrency is a light bulb. It is one of possible aplications and, likely, not even the most important one.</p>
+<p>What is more interesting, is what crypt-anything means for economy. First of all, remember, analyze everything yourself, or just believe: at the time of writing everything about bitcoin is a speculatory bubble. Regardless of the underlying reasons, economically, this is artifical scarce commodity people create, buy and sell mostly in hope of short-term profit. This is not bad or good thing, it's familiar situation for the stock market and economy in general. The Internet <a href="https://en.wikipedia.org/wiki/Dot-com_bubble">was</a> exactly the same.</p>
+<figure>
+<img src="/img/1513973388.png" />
+</figure>
+<p><strong>UPD 22.12.2017:</strong> What a surprise. I <a href="https://twitter.com/xui_nya/status/944254418752540672">was</a> <a href="/img/1513973584.jpg">right</a>.</p>
+<p>Which means it is suggested to not take it as a reliable currency, be always ready to huge 200-300% price drop in less than a day, and of course to not by any means invest money you are not ready to lose everything before you even have time to react.</p>
+<table>
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><em>Originally written on request from inside some russian apple-fag hipster community 29.06.2017 at 08:54</em></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/pages/blog/3">← sha256, Step by Step</a></td>
+<td style="text-align: right;"><a href="/pages/blog/5">&gt;current state of instant messaging →</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</body>
+</html>

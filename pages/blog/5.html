@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>&gt;current state of instant messaging</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<header>
+<h1 class="title">&gt;current state of instant messaging</h1>
+</header>
+<hr />
+<div class="nav">
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/blog">↑ Up</a></td>
+<td style="text-align: center;"><a href="/">Home</a></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+<p>Sending text information between computers using the internet. What could be easier, right? Since the time when www became a thing, it was considered the <a href="https://www.youtube.com/watch?v=szdbKz5CyhA">single most important and basic purpose</a> of having personal computer, and it seemed to be impossible to screw up. But looks like in the early 10's someone accepted the fucking challenge.</p>
+<h3 id="where-is-text-exactly">Where is text, exactly?</h3>
+<p>Everywhere. Webpages on the internet is a plain text, HTTP queries and responses are text, inode tables/permission attributes on your hard disk as well as helpful information in each file's header, such as exif metadata is just plain text, and even text files with .txt extension (ZOMG) is a text. One of the most important principles of UNIX-like operating systems is &quot;<a href="https://en.wikipedia.org/wiki/Everything_is_a_file">Everything is a file</a>&quot;, and most of this files (including system and kernel-related info/config files such as those in /etc and /proc) are text files. Even if you look at simple image or video stream, there's plenty of text beneath, and we will not be able to get rid of it any time soon (even though some of &quot;newschool&quot; IT people really want to).</p>
+<p>The reason behind this is simple: text, especially encoded in ASCII (<a href="https://www.theguardian.com/technology/2018/feb/16/apple-bug-crashes-apps-that-display-telegu-character">can't</a> <a href="https://9to5mac.com/community/the-latest-iphone-security-vulnerability-imessages-bug">vouch</a> <a href="https://en.wikipedia.org/wiki/IDN_homograph_attack">for</a> <a href="https://eev.ee/blog/2015/09/12/dark-corners-of-unicode">unicode</a> though), is ridiculously easy to create, parse and manipulate for both humans <strong>and</strong> computers. For computers it means &quot;always exactly 2 bytes of information per characted, obvious <a href="https://en.wikipedia.org/wiki/Control_character">control characters</a> that fit well into paradigm, unambiguous <code>&lt;EOF&gt;</code>&quot;. For humans it means &quot;no ambiguity among glyphs so you can always distinguish one character from another as long as you picked proper font, therefore always easy to read and understand what was written without peculiar software&quot;.</p>
+<p>Unicode brought noticeable amount of confusion into text processing as a whole, but it's rather a topic for another discussion.</p>
+<p>The point is, the computer was designed to transmit text, is powered by text, and transfering text information is probably the easiest thing you can do with computer when building any sort of software. There's absolutely no reasons to make things this simple overwhelmingly complicated.</p>
+<h3 id="ok-its-important-for-computers-but-is-it-for-people">OK, it's important for computers, but is it for people?</h3>
+<p>Sure, at the time of writing we have big widely available public services spoonfeeding us with ability to <a href="https://twitter.com/twittersupport/status/479307198901026816?lang=en">post animated video</a> in seconds, without even having to search for it in advance. It's a <a href="https://matrix.org/blog/2017/04/04/opening-up-cyberspace-with-matrix-and-webvr">matter of one click</a> to meet another person as a whole in the virtual reality and stuff like that. The primitive nature of text on the other hand, seems to be outdated and boring in comparison.</p>
+<p>But put it this way: the pure text is bare bones, and a lot of user experience was developed upon it, and therefore it's fucking <strong>reliable</strong> – in plenty of unexpectable ways. For example, people with disabilities could <a href="https://en.wikipedia.org/wiki/Speech_synthesis">TTS</a> text-based info easily, but they're completely left out of the party when it comes to your shitty animated emojis, gifs, text presented as images, videos with hardsub and whatever. Text stream is usually very small in size compared to any other kind of multimedia, hence it's accessible for people with slow internet connection and readable on any possible tamagochi you can imagine.</p>
+<p>Text is utilitarian. It transmits information. Not an emotion, not your attitudes or intentions, not your body language, not thousands of possible meanings of saying which may vary based on the tone you said it in, not your smell, voice, sex, age, country of origin, skin color, state of makeup, wealth, taste in clothes, tattoos and if your tonque is pierced or not. That all is nothing but distracting noise in case if you actually have something to say. It may be important for someone whose main personal advantages reside somewhere among mentioned &quot;noise&quot; to show off, but I can't guarantee it's equally important for everyone else to swallow it.</p>
+<h3 id="skype-me-maybe">Skype me maybe?</h3>
+<p>After <a href="https://plus.google.com/+MayurKamat/posts/ETBvtp9VYav">hilarious</a> <a href="https://developers.facebook.com/docs/chat">death</a> (maybe, it's more aprropriate to call it &quot;murder&quot;?) of xmpp as a standard, the whole IM thing turned into a massive shitshow. Everyone (I mean, <a href="https://play.google.com/store/apps/details?id=com.fart_your_friend_N&amp;hl=en">literally</a>) invented their own, <a href="https://en.wikipedia.org/wiki/Vendor_lock-in">intentionally</a> incompatible with everything else, app called &quot;messenger&quot; and invested everything they got to convince as much users as possible that it is <a href="https://www.urbandictionary.com/define.php?term=da%20wae">da wae</a> (deadmemeing should be criminalized, I know). I'm not gonna lie, the good thing about it was increasing competition and as guys from Signal (&quot;yet another&quot;, don't remember it) once stated, kind of <a href="https://signal.org/blog/the-ecosystem-is-moving">untied developer's hands</a>, so they can rapidly develop new things without need to care about backwards compatibility.</p>
+<figure>
+<img src="/img/1519673082.png" />
+</figure>
+<p><a href="https://twitter.com/xui_nya/status/924019009741295616">The bad consequences was bad</a> though. Vendor lock-in is the powerful and heavily criticized mechanism of controlling user, and once someone succeded in taking advantage of it, moving away becomes huge convenience sacrifice for users, and among <a href="/img/1519425352.png">modern society</a> barely anyone willing to commit it. And on a first glance it's totally ok, like, no one have died of not using skype or whatever, so people themselves responsible for their own choices of chat app in which nothing siginificant is ever discussed anyway, right?</p>
+<p>No.</p>
+<p>Sadly, <a href="https://en.wikipedia.org/wiki/Positive_feedback">positive feedback loop</a> is a thing, and the more people is vendor-locked inside some &quot;ecosystem&quot;, the more people outside this ecosystem become alienated, the harder it becomes to live in society dependent on some closed product exclusively owned by some private for-profit company. Hence less people able to bear it, and more of them join to one ecosystem or another, making lives of people outside any of this crap even harder and so on. Until everybody but (roughly) 1% of especially stubborn freaks belong to some kind of enclosed community that becomes entire universe for people trapped within.</p>
+<p>By analyzing any big group of people on a large scale we can easily confirm that tendency. For example, <a href="https://www.reddit.com/r/dataisbeautiful/comments/7iek3g/mapping_reddit_communities_oc">map of social connections</a> between subreddits of reddit (undoubtly largest existing platform of this type for now) reveals some of deeply enclosed self-contained &quot;islands&quot; that isn't in any way connected to the rest of the world.</p>
+<figure>
+<img src="/img/1519428431.png" />
+</figure>
+<p>As expected, the apple and cryptocurrency-related circles are among them.</p>
+<h3 id="but-is-this-even-dangerous">But is this even dangerous?</h3>
+<p>Remember how much people inside any &quot;ecosystem&quot; are dependent on everything about it, and how little they care about the rest of the world (they aren't directly connected to anyway)? If island grows big and powerful enough, participation in it could become obligatory to perform some kind of activity at all. For example, in current year to get hired by tech-related company, you need Skype. Period. This way using Skype becomes literally matter of survival for a lot of people.</p>
+<p>And mammals don't usually question whatever their entire life depends on. We don't question our only source of food when we are e.g. in prison. It's natural, we just take it, and hope it won't be shut down any time soon. Here's the menace – the company with so much control upon people's lives can do whatever it wants. Due to extremely low <a href="https://en.wikipedia.org/wiki/Price_elasticity_of_demand">PED</a>, the product could become abusively shitty, users could be threated like dirt, and no one will leave anyway.</p>
+<p><a href="https://hub.zhovner.com/geek/how-skype-fixes-security-vulnerabilities">That's exactly what happened to Skype once</a>.</p>
+<h3 id="and-gib-me-dat-phone-numbir-b">And gib me dat phone numbir, B***!</h3>
+<p>On a top of everything said above, being inspired by the rise of WhatsApp, major players almost simultaneously introduced another &quot;convenient&quot; feature. Providing cell phone number is now obligatory to use absolute majority of messengers. Again, all conspirology aside, there's clearly obvious incentive behind that move: number is a great and universal identifier, it's easier for people to find whoever they know already inside messenger without asking for &quot;nickname&quot; explicitly. Therefore users can just install app and start chatting with friends in seconds. If you think there's already trendy IT buzzword for it, you're goddamn right. That thing called &quot;&quot;.</p>
+<p>Except:</p>
+<ol type="1">
+<li><p>Relying entirely on a baseband network is yet another <a href="https://en.wikipedia.org/wiki/Single_point_of_failure">SPOF</a> which is very bad thing for any system.</p></li>
+<li><p>In many countries you can not legally purchase SIM card without confirmation of identity, therefore TOS of this kind light-mindedly neglects the user's desire not to be doxxed and traced.</p></li>
+<li><p>Phone number of any kind periodically (even if it's &quot;Skype number&quot; or something) costs fixed amount of money to be prolonged, so this messengers are not exactly as &quot;free of cost&quot; as they claim.</p></li>
+<li><p>SIM card could be physically lost along with the access to all contacts and conversations associated. Multi-factor authentication with password solves the issue, but if we have to enable it anyway, the whole thing with <em>phone number</em> <strong>AND</strong> obligatory another <em>factor</em> <strong>AND</strong> <em>password</em> becomes even more entangled and fragile than regular sign up via nickname/password, what kinda destroys the main purpose (simplicity for an end user) entirely.</p></li>
+</ol>
+<p>This brings us to the thought that aspiration to make things even more user-friendly isn't exactly the main driving force behind all of this.</p>
+<h3 id="what-we-need">What we need</h3>
+<ol type="1">
+<li><p>Royalty-free, well documented and properly designed with various real-life use-cases in mind, <strong>standard</strong>, such as <a href="https://learn.equalit.ie/wiki/Np1sec">(N+1)sec</a>.</p></li>
+<li><p>Acknowlegement of this standard by either government or as a common business practice, so everyone will be forced to have it as an option. Free competition doesn't work here; standards are like vaccination – they must be widely adopted to be worthwhile, and don't make any sense per se.</p></li>
+</ol>
+<h3 id="what-we-deserved">What we deserved</h3>
+<p><a href="https://xkcd.com/1810"><img src="/img/1519435987.png" /></a></p>
+<h3 id="no-seriously">No, seriously</h3>
+<p>I started to write this post in order to systematize current state of affairs in digital messaging world, but carried away a little bit. By the way, it's not possible to make one clear &quot;do this and this, and you will achieve this&quot; statement on this topic, because hooking sufficient amount people into using some particular thing is hard task even for our beloved tech monopolies, imagine being just &quot;some guy&quot; who tries to figure out what's happening and what one independent person could do about it (hint: nothing).</p>
+<p>I needed this to put everything I know about modern means of communication in order, and maybe reveal facts and possibilities I wasn't previously aware of. The final decision will vary based on if your priorities and concerns is mostly security-related, or anonymity/freedom-related, and whether you even obsessed with any of this, or just want to quickly pick up something that &quot;just works&quot;.</p>
+<h3 id="some-usually-suggested-free-alternatives">Some usually suggested free alternatives</h3>
+<p><strong>Tox, IRC, Jabber/XMPP</strong></p>
+<ul>
+<li>In is not possible to receive messages while offline, or even have any kind of notification that something happened when you were afk. You need to maintain your server with log engine of some sort to be accessible. I can do it. Majority of people can not do it, and even with people like me it's obviously too much to ask.</li>
+<li>No obvious way to make public groupchats in Tox, they claim croupchats exist, but in reality even development of toxcore itself is discussed in IRC channel.</li>
+<li><a href="https://github.com/TokTok/c-toxcore/issues?q=is%3Aissue+is%3Aopen+label%3AP%3Ahigh">p:high</a>. Just read it.</li>
+</ul>
+<p><strong>And yet again, for IRC, Jabber/XMPP</strong></p>
+<ul>
+<li>Basically, <a href="https://matrix.org/docs/guides/faq.html#what-is-the-difference-between-matrix-and-xmpp">this</a>.</li>
+</ul>
+<p><strong>Matrix/Riot</strong></p>
+<ul>
+<li>At least it's partially usable at &quot;just werks&quot; level.</li>
+<li>They managed to give a birth to incredibly bloated mess as a reference implementation and at this point I highly doubt it's going anywhere. Would be glad to be proven wrong though.</li>
+</ul>
+<p><strong>GNU Ring</strong></p>
+<ul>
+<li>Good for video/audio calls and screen sharing (takes ages to find peers because muh decentralization though).</li>
+<li>Is a fucking joke when it comes to text.</li>
+</ul>
+<h3 id="some-actually-acceptable-things-to-consider">Some actually acceptable things to consider</h3>
+<p><strong>Appear.in/Jitsi Meet</strong></p>
+<p>Possible solution to communicate with grandparents, casual friends or to suggest collegues for occasional group video meetings without crippling your computer by installing various &quot;legal malware&quot;. Literally less trouble than with skype or whatever. Open browser, click, send link everyone else – you're set. Works on top of <a href="https://webrtc.org">WebRTC</a> – same thing said Skype (modern version) powered by anyway, so the video/audio quality and everything else will be exactly the same.</p>
+<p><strong>Wire</strong></p>
+<p>Exactly as other popular messengers (for-profit walled garden, all for vendor-locking and stuff), but doesn't require phone number / google apps to sign up and use, no data mining, no unwanted &quot;features&quot;, simple, fast, and properly encrypted by default (<a href="https://www.x41-dsec.de/reports/Kudelski-X41-Wire-Report-phase1-20170208.pdf">audited</a>). Pretty cool if someone will not mind installing it for you.</p>
+<p><strong>E-mail</strong></p>
+<ul>
+<li>Everyone has it.</li>
+<li>Works well for mobile devices (proven), you just receive notification whenever mail arrives and can reply instantly or delay replying for convenient time.</li>
+<li>Works even better for desktop stations, naturally.</li>
+<li>Sending any kind of files, rich text formatting, links – everything you need.</li>
+<li>Always accessible, if you were offline, you just check mail afterwards and receive everything.</li>
+<li>Takes <a href="https://mailinabox.email">nothing</a> (in comparison) to up your own server if you really need to and don't trust information anybody.</li>
+<li>No one yet invented anything better.</li>
+<li><p>Cons:</p>
+<ul>
+<li>SPAM.</li>
+<li>Not exactly &quot;instant&quot;.</li>
+<li>You shouldn't send stuff like &quot;lol chek'd&quot; via e-mail. You really shouldn't. It encourages writing meaninful responses at least 2-3 sentences long by its nature.</li>
+<li>State of encryption is rather complicated. While totally <a href="https://k9mail.github.io/documentation/security/pgpmime.html">possible</a> even on the fly, in the year when people (reasonably) demand everything to be encrypted by default, having to perform some actions to achieve encryption is a very major drawback.</li>
+</ul></li>
+</ul>
+<p><strong>Default &quot;direct messages&quot; on various popular websites</strong></p>
+<p>Twitter, tumblr, reddit, e-commerce sites, various social media you anyway hang out on – all probably have their own homebrew web-based messaging system. And most of them support notifying about new messages via e-mail, so it becomes very easy to gather everything meaningful in one place.</p>
+<p>It's cool. It's lesser evil. Use it.</p>
+<p>Bye.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><em>Originally written to get it off my chest 24.02.2018 at 07:39</em></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/pages/blog/4">← Blockchain</a></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</body>
+</html>

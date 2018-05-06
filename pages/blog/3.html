@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>sha256, Step by Step</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<header>
+<h1 class="title">sha256, Step by Step</h1>
+</header>
+<hr />
+<div class="nav">
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/blog">↑ Up</a></td>
+<td style="text-align: center;"><a href="/">Home</a></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+<p>Almost every write-up I read, every video explanation I watched, and every talk I heard about cryptography tend to delicately avoid one critically important thing. People (even the <a href="https://youtu.be/bBC-nXj3Ng4?t=13m47s">good ones</a>) usually describe main cryptographic function everything they talking about based on, as a some very complex, but very trustwothy black box, which just does required job &quot;somehow&quot;.</p>
+<p>I hate this approach and now I'm about to fill the hole. Step-by step, I'll show you everything this function does with example string to produce output, answer which basic mathematical properties it relies on, and explain why we trust it so much.</p>
+<p>But first things first. sha256 was designed (it's important to say designed, not &quot;developed&quot;) in 2001 at National Secure Agency of USA alongside with sha224, sha384 and sha512, and described in <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">publication</a> known as FIPS 180-2. This document covers precisely what should be done, but provides no reference to &quot;official&quot; implementaions, so it's all up to end developer to figure out best way to do so in his favourite programming language and/or hardware.</p>
+<p>As can be concluded from the above, there is plenty of custom implementations from independent developers and companies all around the world for <a href="https://github.com/froydnj/ironclad/blob/master/src/digests/sha256.lisp">almost</a> <a href="https://bitbucket.org/pypy/pypy/src/tip/lib_pypy/_sha256.py">every</a> <a href="http://cpansearch.perl.org/src/AVAR/Digest-SHA2-1.1.1/SHA2.pm">possible</a> <a href="https://hackage.haskell.org/package/cryptohash-sha256-0.11.100.1/docs/src/Crypto-Hash-SHA256.html">programming</a> <a href="https://golang.org/src/crypto/sha256/sha256.go">language</a> or even <a href="https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/sha-256-implementations-paper.pdf">hardware architecture</a>. Highly possible, at least some of them are flawed, of course. But before choosing, we can test implementation using <a href="https://www.cosic.esat.kuleuven.be/nessie/testvectors/hash/sha/Sha-2-256.unverified.test-vectors">example vectors</a>, thanks <a href="https://www.cosic.esat.kuleuven.be/nessie">NESSIE</a>. If every test vector gives anticipated output after applying function, it's overwhelmingly possible that this particular implementation is all right.</p>
+<p>Most widely used implementations is of course GNU's <a href="http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=blob;f=lib/sha256.c;h=c0fb8beecfe0591ae68d6dda74ca08fe95a7d222;hb=HEAD">coreutils</a> one, and <a href="https://github.com/openssl/openssl/blob/master/crypto/sha/sha256.c">this</a> version from OpenSSL project. But I will use optimized for better performance and readability <a href="https://github.com/ckolivas/cgminer/blob/master/sha2.c">implementataion</a> from cgminer, just because it's much easier to compile and use stand alone. Don't worry, we'll test it before proceed. I created a <a href="/files/sha256test.tgz">bundle</a> with a clear readme inside, so everyone who want to perform test locally can download and recheck everything i've just did. 100% bamboozle-free guarantee.</p>
+<pre><code>Making executable... ok
+Generating test vectors... ok
+Running test [ 1/9 ] ok
+Running test [ 2/9 ] ok
+Running test [ 3/9 ] ok
+Running test [ 4/9 ] ok
+Running test [ 5/9 ] ok
+Running test [ 6/9 ] ok
+Running test [ 7/9 ] ok
+Running test [ 8/9 ] ok
+Running test [ 9/9 ] ok</code></pre>
+<p>So now, as we sure our function are in touch with official test vectors, let's see what it does. For example showcase, I suggest using &quot;Pepe the frog&quot; string in ASCII encoding (yes, this is important), but you can substitute it with whatever.</p>
+<h3 id="what-is-your-string-to-computer">What is your string to computer</h3>
+<p>Probably you have heard something about binaries, maybe read something like this in plain old programming book from past century. Except bearded engineers, no one actually operates on this level anymore. It's all about &quot;strings&quot;, &quot;objects&quot; and &quot;arrays&quot; now. But, the way computer actually works didn't changed. We've just wrote several layers of abstraction to hide it behind.</p>
+<p>But, the actual structure of the string is a big deal when it comes to cryptography or similar low-level algorithms. Let's take a closer look.</p>
+<figure>
+<img src="/img/1512929481.png" />
+</figure>
+<p>It would be much simpler to read hex values if you imagine a single byte as a decimal number from 1 (00000000) to 255 (11111111). There is a little <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Hexadecimal_multiplication_table.svg/1024px-Hexadecimal_multiplication_table.svg.png">helper</a> to convert our regular decimal numbers to hex value if you really interested in reading pure data as it is. If you're not, just remember: 8 binary positions for readability usually represented as two digit hexadecimal value. From 0x00, which is 00000000 in binary, to 0xFF, which is 11111111. Just specific notation, convenient for low-level programmers, that's it.</p>
+<p>So first of all, we calculate our &quot;Pepe the frog&quot; legth, which is 13 bytes, allocate needed amount of cells in RAM, so no other data could be accidentaly written into this range, and write binary representation of our string in this cells. Something like this.</p>
+<figure>
+<img src="/img/1512929533.png" />
+</figure>
+<p>Then address (notice, we don't copy anything anywhere. It's just pointless in most cases) of this binary representation goes into sha256 function. This is where fun part begins.</p>
+<h3 id="some-weird-constants">Some weird constants</h3>
+<p>In previous chapter we've learned how to read and understand hexadecimal values. It wasn't just &quot;FYI&quot;, because this part of the story hardly depends on it. The literally first thing that happens inside the function – it's initializing bunch of mysterious hexadecimal values. And we should be aware what it means to proceed. Take a look.</p>
+<pre><code>uint32_t sha256_h0[8] =
+            {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+
+uint32_t sha256_k[64] =
+            {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+             0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+             0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+             0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+             0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+             0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+             0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+             0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+             0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+             0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+             0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+             0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+             0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+             0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};</code></pre>
+<p>Scary enough, right? Don't worry. I'll decode first 8 hexes for you.</p>
+<pre><code>0x6a09e667 -&gt; 0110 1010 0000 1001 1110 0110 0110 0111 -&gt; 1779033703
+0xbb67ae85 -&gt; 1011 1011 0110 0111 1010 1110 1000 0101 -&gt; 3144134277
+0x3c6ef372 -&gt; 0011 1100 0110 1110 1111 0011 0111 0010 -&gt; 1013904242
+0xa54ff53a -&gt; 1010 0101 0100 1111 1111 0101 0011 1010 -&gt; 2773480762
+0x510e527f -&gt; 0101 0001 0000 1110 0101 0010 0111 1111 -&gt; 1359893119
+0x9b05688c -&gt; 1001 1011 0000 0101 0110 1000 1000 1100 -&gt; 2600822924
+0x1f83d9ab -&gt; 0001 1111 1000 0011 1101 1001 1010 1011 -&gt; 0528734635
+0x5be0cd19 -&gt; 0101 1011 1110 0000 1100 1101 0001 1001 -&gt; 1541459225</code></pre>
+<p>I used python for this conversion because it solves a lot of problems such as trailing whitespace out of the box and magnificently easy to use. Not to mention, <a href="http://cython.org">cython</a>'s math module is nothing but a <a href="https://docs.python.org/3/library/math.html#constants">thin wrapper</a> to famous GNU's <a href="https://gmplib.org">gmp</a> library, so we are totally ok here.</p>
+<pre><code>arr = [0x6a09e667, 0xbb67ae85, ...]
+for each in arr:
+    print(&#39;{} -&gt; {} -&gt; {}&#39;.format(
+        hex(each), bin(each), int(each))
+    )</code></pre>
+<p>One can use it to decode remaining 64 values. Seems pretty random, right? So where are this numbers comes from? It is simple. Let's take first 8 primes (it's easy to analytically <a href="https://proofwiki.org/wiki/Square_Root_of_Prime_is_Irrational">prove</a>, that their roots are irrational), calculate square root, ant substract first 8 bytes from each fractional part.</p>
+<p>It's a lot of <a href="https://stackoverflow.com/questions/16444726/binary-representation-of-float-in-python-bits-not-hex">headache</a> to deal with conversions from human readable fraction component to exact binary representation, because <a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a> standard, which declares some artifical counter-intuitive rules for floating point calculations, e.g. 1.0 in IEEE's approved representation will look like 00111111100000000000000000000000 (or 1065353216 if we convert it to decimal). Whatever.</p>
+<p>The fact is, this numbers is exactly what comes after 1111111 in binary representation of square root, so basically, it is fraction part of said root.</p>
+<pre><code>1.4142135 in binary (IEEE 754) -&gt; 1111111 0110 1010 0000 1001 1110 011
+0x6a09e667 in binary (as mentioned above) -&gt; 0110 1010 0000 1001 1110 0110 0110 0111 </code></pre>
+<p>Remove 1111111, and you'll notice, remaining parts are exactly the same. The following 64 constants are just like explained above, but for cubic roots of first 64 prime numbers.</p>
+<h3 id="strings-adventures-inside-the-function">String's adventures inside the function</h3>
+<p>The whole sha256 castle consists of 4 parts, or functions for those who already used to this word. Init, update, transform and final. &quot;Init&quot; is nothing. Literally, it's just here to put initial variables into correspondenting data structures and create one 2 zero variables. That's it.</p>
+<p>&quot;Update&quot; is still preparatory function, but more meaningful one. If the message size is less than 64, it just does the exact byte-to-byte copy of our message, so our block will be &quot;Pepe the frog&quot;, 13 bits long – no transformation, nothing.</p>
+<pre><code>tmp_len = SHA256_BLOCK_SIZE - ctx-&gt;len; // Block size, 64 bytes - 0
+rem_len = len &lt; tmp_len ? len : tmp_len; // Message size, 13 bytes
+
+memcpy(&amp;ctx-&gt;block[ctx-&gt;len], message, rem_len); // create block of length 13 with contents &quot;Pepe the frog&quot;
+    
+if (ctx-&gt;len + len &lt; SHA256_BLOCK_SIZE) {
+    ctx-&gt;len += len; // 0 + 13 = 13 bytes
+    return;
+}</code></pre>
+<p>But if our message is bigger, for example &quot;Pepe the frog&quot; 5 times in a row (69 bytes long), the block size will be 64 bytes long, and we got 2 new numbers: the first is how much our message is larger than 64, and the second one is in how many times. Then first 64 bytes of our message goes to &quot;Transform&quot; function.</p>
+<pre><code>cc -w sha256test.c -o sha256test &amp;&amp; ./sha256test test aa
+=== Update ===
+Message: Pepe the frog Pepe the frog Pepe the frog Pepe the frog Pepe the frog
+Block size: 64
+String size: 69
+Overflow: 5
+&quot;Pepe the frog Pepe the frog Pepe the frog Pepe the frog Pepe the&quot; -&gt; transform</code></pre>
+<p>Usually, during the entire operation, &quot;Trasnformation&quot; occurs three times. First time we pass first 64 bytes of our message, second time we pass remaining part (if it's shorter than 64 bytes, nothing happens) and one time in a &quot;Final&quot; – we will return to this soon.</p>
+<h3 id="transform-me-sempai">Transform me, Sempai</h3>
+<p>This is core part of the entire thing. Here our transformation becomes irreversible, so we can't calculate back and restore previous message. Let's return to the simplest, &quot;Pepe the frog&quot; example. It was transformed during entire operation only once, so it will be easy to track what happened here.</p>
+<p>Actually, not exactly &quot;Pepe the frog&quot;. The following code:</p>
+<pre><code>ctx-&gt;block[ctx-&gt;len] = 0x80;</code></pre>
+<p>Puts 0x80, which is special control sequence to the end of the string. Like this.</p>
+<figure>
+<img src="/img/1512929579.png" />
+</figure>
+<p>Then our string, splitted to a 8-bit long pieces, goes through a plenty of transformations, including mixing in pseudo-random way with constants mentioned above, mirroring, concatenation, and so on. But nothing of this can guarantee things can not be easily calculated back. Basically, everything mentioned in &quot;Transform&quot; part (if you brave enough to look inside the code), is a bunch of dirty hacks to hardly ensure constant length of the output hash string. Don't let them fool you!</p>
+<p>The only one irreversible part of the entire process declared somewhere outside sha256.c and is so simple it's magnificent.</p>
+<h3 id="bitwise-shift">Bitwise shift</h3>
+<p>Imagine this</p>
+<pre><code>#define ROTR(x, n)   ((x &gt;&gt; n) | (x &lt;&lt; ((sizeof(x) &lt;&lt; 3) - n)))</code></pre>
+<p>But much simpler. &quot;&lt;&lt;&quot; is key word for bitwise shifting in C, so, for example, 0011 &lt;&lt; 2 will give us 1100. That's it. But it's definitely one-way ticket. Because shifting some character that makes sense 2 bits left or right we lose 2 bits of information forever.</p>
+<figure>
+<img src="/img/1512929618.png" />
+</figure>
+<p>And it becomes hard (in case of two bits shifing, 4 times harder) to restore anything meaninful out of output.</p>
+<figure>
+<img src="/img/1512929653.png" />
+</figure>
+<p>And now imagine. In sha256 we normally expose 64 (rounds) * 3 (times &quot;Transform&quot; function executes) * 3 * 4 bitwise shifting operations of variable length, mixing remaining parts of our input string with above mentioned irrational constants, then pack it into compact 512 bits long output. Which practically makes restoring something meaningful out of it 2^256 times (that's <a href="https://www.youtube.com/watch?v=S9JGmA5_unY">a lot</a>) harder than encoding.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>Contents of &quot;W&quot; array for &quot;Pepe the frog&quot;:</p>
+<pre><code>W: [epeP] [eht ] [orf ] [] [] [] [] [] [] [] [] [] [] [] [] [h] [24bc9e26] [67853315] [984863d] [a771fe7e] [d3db44d3] [c0d95b29] [cac765af] [ab7e8c47] [c5d5e0f7] [a10685b0] [f3c66da6] [662149d5] [bc34b129] [5890fd35] [4a377104] [9657689b] [876e3b3c] [f73a8a0] [e0bd4ed5] [71d6b549] [58458f07] [36c94078] [10bceae2] [4a385e1a] [9181e506] [6f97b46f] [28224f99] [53bd28fa] [c022139f] [78580749] [dfbc8606] [12590d91] [76d2dc4c] [c377e0c5] [9bb7a089] [a4bd3a04] [9bbb60d2] [4d8010ab] [29c1d2d6] [31b184e4] [666b6977] [a2e48eeb] [5b5a9a60] [695c9c35] [c837039b] [b76986e4] [d6067306] [8d6c71c5]</code></pre>
+<p>You may notice broken parts of string all around the array. Then for each cell of W, we doo some voodo magic (a lot of bitwise shifts involved):</p>
+<pre><code>t1 = wv[7] + SHA256_F2(wv[4]) + CH(wv[4], wv[5], wv[6])
+                + sha256_k[j] + w[j]; // w[j] contains some parts of our string</code></pre>
+<p>then in forming some cells of WV array involved our t1 variable</p>
+<pre><code>wv[4] = wv[3] + t1; // So our string affects t1 variable
+wv[0] = t1 + t2; // another t1 usage</code></pre>
+<p>And finally after 64 rounds of this we got something that we can decode by rules of ASCII character table, and get 033A618784321DD5A47F37C9496ADCEC498DB61BC07B425492EC077A024CFC39 to utilize in advanced usage cases such as <a href="/pages/blog/2">blockchain</a> or <a href="https://developer.mozilla.org/en-US/docs/Archive/Security/Introduction_to_Public-Key_Cryptography">public-key cryptography</a>; This is called a hash string. I hope it became more clear now.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><em>Originally written in all seriousness 04.09.2017 at 02:02</em></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="/pages/blog/2">← Books</a></td>
+<td style="text-align: right;"><a href="/pages/blog/4">Blockchain →</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</body>
+</html>
