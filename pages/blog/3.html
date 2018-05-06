@@ -17,17 +17,7 @@
 <h1 class="title">sha256, Step by Step</h1>
 </header>
 <hr />
-<div class="nav">
-<table>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><a href="/blog">↑ Up</a></td>
-<td style="text-align: center;"><a href="/">Home</a></td>
-<td style="text-align: right;"></td>
-</tr>
-</tbody>
-</table>
-</div>
+<div id="breadcrumbs"><p>/ <a href="/">root</a> / <a href="/blog">blog</a> / 3 </div>
 <hr />
 <p>Almost every write-up I read, every video explanation I watched, and every talk I heard about cryptography tend to delicately avoid one critically important thing. People (even the <a href="https://youtu.be/bBC-nXj3Ng4?t=13m47s">good ones</a>) usually describe main cryptographic function everything they talking about based on, as a some very complex, but very trustwothy black box, which just does required job &quot;somehow&quot;.</p>
 <p>I hate this approach and now I'm about to fill the hole. Step-by step, I'll show you everything this function does with example string to produce output, answer which basic mathematical properties it relies on, and explain why we trust it so much.</p>
