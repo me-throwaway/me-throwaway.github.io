@@ -13,12 +13,9 @@
   <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-<header>
-<h1 class="title">sha256, Step by Step</h1>
-</header>
-<hr />
 <div id="breadcrumbs"><p>/ <a href="/">root</a> / <a href="/pages/blog">blog</a> / 3 </div>
 <hr />
+<h1 class="title">sha256, Step by Step</h1>
 <p>Almost every write-up I read, every video explanation I watched, and every talk I heard about cryptography tend to delicately avoid one critically important thing. People (even the <a href="https://youtu.be/bBC-nXj3Ng4?t=13m47s">good ones</a>) usually describe main cryptographic function everything they talking about based on, as a some very complex, but very trustwothy black box, which just does required job &quot;somehow&quot;.</p>
 <p>I hate this approach and now I'm about to fill the hole. Step-by step, I'll show you everything this function does with example string to produce output, answer which basic mathematical properties it relies on, and explain why we trust it so much.</p>
 <p>But first things first. sha256 was designed (it's important to say designed, not &quot;developed&quot;) in 2001 at National Secure Agency of USA alongside with sha224, sha384 and sha512, and described in <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">publication</a> known as FIPS 180-2. This document covers precisely what should be done, but provides no reference to &quot;official&quot; implementaions, so it's all up to end developer to figure out best way to do so in his favourite programming language and/or hardware.</p>
